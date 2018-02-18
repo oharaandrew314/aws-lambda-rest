@@ -32,6 +32,10 @@ import java.util.*
 
 /**
  * CRUD resource for pets
+ * 
+ * The ResourceHandler base class accepts a "resourcePath" parameter.
+ * This must be the name of the API Gateway event pathParameter that
+ * holds the id of the resource you are working with.
  */
 class PetsHandler : ResourceHandler<PetsHandler.Pet>("petId") {
 
@@ -87,5 +91,49 @@ class PetsHandler : ResourceHandler<PetsHandler.Pet>("petId") {
                 .apply { pets[resourceId] = this }
     }
 }
+```
+
+Example SAM Template to deploy your resource lambda
+
+```yml
+AWSTemplateFormatVersion: 2010-09-09
+Transform: AWS::Serverless-2016-10-31
+Description: aws-lambda-rest example for pets endpoints
+
+Resources:
+  PetsResource:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: io.andrewohara.pets.PetsHandler
+      Runtime: java8
+      CodeUri: ./kobaltBuild/libs/example-pets-0.0.1.jar
+      Timeout: 30
+      MemorySize: 1024
+      Events:
+        ListPets:
+          Type: Api
+          Properties:
+            Path: /pets/
+            Method: get
+        GetPet:
+          Type: Api
+          Properties:
+            Path: /pets/{petId}
+            Method: get
+        UpdatePet:
+          Type: Api
+          Properties:
+            Path: /pets/{petId}
+            Method: put
+        CreatePet:
+          Type: Api
+          Properties:
+            Path: /pets/
+            Method: post
+        DeletePet:
+          Type: Api
+          Properties:
+            Path: /pets/{petId}
+            Method: delete
 ```
 

@@ -9,6 +9,10 @@ import java.util.*
 
 /**
  * CRUD resource for pets
+ *
+ * The ResourceHandler base class accepts a "resourcePath" parameter.
+ * This must be the name of the API Gateway event pathParameter that
+ * holds the id of the resource you are working with.
  */
 class PetsHandler : ResourceHandler<PetsHandler.Pet>("petId") {
 
