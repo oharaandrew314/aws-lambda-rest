@@ -10,7 +10,7 @@ Resources:
       Runtime: java8
       CodeUri: ./kobaltBuild/libs/example-pets-0.0.1.jar
       Timeout: 30
-      MemorySize: 2014
+      MemorySize: 1024
       Events:
         ListPets:
           Type: Api
