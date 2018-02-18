@@ -1,0 +1,11 @@
+language: java
+java:
+- openjdk8
+
+before_install:
+  - chmod +x kobaltw
+install: true
+
+script: ./kobaltw test
+after_success:
+  - ./kobaltw uploadBintray

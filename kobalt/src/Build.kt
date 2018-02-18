@@ -30,12 +30,12 @@ val awsLambdaRest = project {
     }
 
     assemble {
-        mavenJars {
-        }
+        mavenJars {}
     }
 
     bintray {
         publish = true
+
     }
 }
 

@@ -5,3 +5,4 @@ service-out.yml
 kobaltBuild/
 *.iml
 Kobalt/out/
+local.properties
