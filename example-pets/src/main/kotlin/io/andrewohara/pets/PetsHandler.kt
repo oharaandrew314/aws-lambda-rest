@@ -7,6 +7,9 @@ import io.andrewohara.lambda.rest.DataValidationException
 import io.andrewohara.lambda.rest.ResourceHandler
 import java.util.*
 
+/**
+ * CRUD resource for pets
+ */
 class PetsHandler : ResourceHandler<PetsHandler.Pet>("petId") {
 
     data class Pet(val id: String, val name: String, val type: PetType)
@@ -25,18 +28,35 @@ class PetsHandler : ResourceHandler<PetsHandler.Pet>("petId") {
         }
     }
 
+    /**
+     * List all the pets (200)
+     */
     override fun list(event: APIGatewayProxyRequestEvent, context: Context) = pets.values.toList()
 
+    /**
+     * Get the pet by its id, or null (404)
+     */
     override fun get(resourceId: String, event: APIGatewayProxyRequestEvent, context: Context) = pets[resourceId]
 
+    /**
+     * Create a pet if the request is valid (200), otherwise throw DataValidationException (400)
+     */
     override fun create(event: APIGatewayProxyRequestEvent, context: Context): Pet {
         return getRequest(event)
                 .let { Pet(UUID.randomUUID().toString(), it.name, it.type) }
                 .apply { pets[id] = this }
     }
 
+    /**
+     * delete a pet if it exists (200), otherwise return null (404)
+     */
     override fun delete(resourceId: String, event: APIGatewayProxyRequestEvent, context: Context) = pets.remove(resourceId)
 
+    /**
+     * update a pet if it exists (200)
+     * If request is invalid, throws DataValidationException (400)
+     * if pet does not exist, returns null (404)
+     */
     override fun update(resourceId: String, event: APIGatewayProxyRequestEvent, context: Context): Pet? {
         if (resourceId !in pets) return null
         return getRequest(event)
