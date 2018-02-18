@@ -1,0 +1,7 @@
+Makefile
+.idea/
+.kobalt/
+service-out.yml
+kobaltBuild/
+*.iml
+Kobalt/out/
