@@ -18,6 +18,23 @@ A JVM micro-framework for creating REST API resources on AWS Lambda, written in 
   - e.g. `/clients/{clientId}/pets` would list the pets for the given client
 - Custom Authorizer Helpers
 
+## Installation
+
+My repo and jcenter are required
+
+```groovy
+repositories {
+    jcenter()
+    maven {
+        url 'https://dl.bintray.com/oharaandrew314/maven'
+    }
+}
+
+dependencies {
+    compile 'io.andrewohara:aws-lambda-rest:0.1.0'
+}
+```
+
 ## Usage
 
 ```kotlin
