@@ -17,6 +17,7 @@ A JVM micro-framework for creating REST API resources on AWS Lambda, written in 
 - Nested resources `/clients/{clientId}/pets/{petId}`
   - e.g. `/clients/{clientId}/pets` would list the pets for the given client
 - Custom Authorizer Helpers
+- Pass deserialized request body into handler methods
 
 ## Installation
 
