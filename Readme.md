@@ -39,7 +39,53 @@ dependencies {
 
 ## Usage
 
+This is a minimal example.  The only operations implemented are `options` (by default) and `get`.  Any other operation will return a `405`.  Cors is enabled by default.
+
 ```kotlin
+// MinimalExample.kt
+package io.andrewohara.minimal
+
+import com.amazonaws.services.lambda.runtime.Context
+import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent
+import io.andrewohara.lambda.rest.ResourceHandler
+
+data class Person(val id: String)
+
+class MinimalResource: ResourceHandler<Person>("id") {
+
+    override fun get(resourceId: String, event: APIGatewayProxyRequestEvent, context: Context): Person? {
+        return Person(resourceId)
+    }
+}
+```
+
+```yml
+# service.yml
+AWSTemplateFormatVersion: 2010-09-09
+Transform: AWS::Serverless-2016-10-31
+Description: aws-lambda-rest example for pets endpoints
+
+Resources:
+  MinimalResource:
+      Type: AWS::Serverless::Function
+      Properties:
+        Handler: io.andrewohara.minimal.MinimalResource
+        Runtime: java8
+        CodeUri: ./kobaltBuild/libs/example-pets-0.0.1.jar
+        Timeout: 30
+        MemorySize: 1024
+        Events:
+          GetPerson:
+            Type: Api
+            Properties:
+              Path: /people/{id}
+              Method: get
+```
+
+This is a full CRUD example.
+
+```kotlin
+// PetsExample.kt
 package io.andrewohara.pets
 
 import com.amazonaws.services.lambda.runtime.Context
@@ -135,6 +181,7 @@ class PetsResource : ResourceHandler<Pet>(resourcePathParameter="petId", enableC
 Example SAM Template to deploy your resource lambda
 
 ```yml
+# service.yml
 AWSTemplateFormatVersion: 2010-09-09
 Transform: AWS::Serverless-2016-10-31
 Description: aws-lambda-rest example for pets endpoints
