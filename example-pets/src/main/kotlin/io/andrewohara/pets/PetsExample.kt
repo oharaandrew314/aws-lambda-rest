@@ -2,8 +2,6 @@ package io.andrewohara.pets
 
 import com.amazonaws.services.lambda.runtime.Context
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent
-import com.beust.klaxon.Klaxon
-import io.andrewohara.lambda.rest.DataValidationException
 import io.andrewohara.lambda.rest.ResourceHandler
 import io.andrewohara.lambda.rest.RestException
 import java.util.*
@@ -21,17 +19,7 @@ enum class PetType { Cat, Dog }
  */
 class PetsResource : ResourceHandler<Pet>("petId") {
 
-    private val mapper = Klaxon()
     private val pets = mutableMapOf<String, Pet>()
-
-    private fun getData(event: APIGatewayProxyRequestEvent): CreateUpdatePetData {
-        return try {
-            event.body?.let { mapper.parse<CreateUpdatePetData>(it) } ?: throw DataValidationException(event)
-        } catch (e: IllegalArgumentException) {
-            e.printStackTrace()
-            throw DataValidationException(event)
-        }
-    }
 
     /**
      * List all the pets (200)
@@ -54,7 +42,7 @@ class PetsResource : ResourceHandler<Pet>("petId") {
      */
     @Throws(RestException::class)
     override fun create(event: APIGatewayProxyRequestEvent, context: Context): Pet {
-        return getData(event)
+        return event.parseBody<CreateUpdatePetData>()
                 .let { Pet(UUID.randomUUID().toString(), it.name, it.type) }
                 .apply { pets[id] = this }
     }
@@ -84,7 +72,7 @@ class PetsResource : ResourceHandler<Pet>("petId") {
     @Throws(RestException::class)
     override fun update(resourceId: String, event: APIGatewayProxyRequestEvent, context: Context): Pet? {
         if (resourceId !in pets) return null
-        return getData(event)
+        return event.parseBody<CreateUpdatePetData>()
                 .let { Pet(resourceId, it.name, it.type) }
                 .apply { pets[resourceId] = this }
     }

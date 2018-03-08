@@ -10,6 +10,8 @@ import org.junit.Test
 
 class ResourceHandlerUnitTest {
 
+    data class Pet(val name: String)
+
     private val context = object: Context {
         override fun getAwsRequestId() = throw UnsupportedOperationException()
         override fun getLogGroupName() = throw UnsupportedOperationException()
@@ -165,7 +167,7 @@ class ResourceHandlerUnitTest {
     }
 
     @Test
-    fun updateWithInvalidData() {
+    fun updateWithEmptyData() {
         val testObj = object: ResourceHandler<String>("id") {
             override fun update(resourceId: String, event: APIGatewayProxyRequestEvent, context: Context) = throw DataValidationException(event)
         }
@@ -196,11 +198,20 @@ class ResourceHandlerUnitTest {
     }
 
     @Test
-    fun createInvalidData() {
+    fun createWithEmptyData() {
         val testObj = object: ResourceHandler<String>("id") {
             override fun create(event: APIGatewayProxyRequestEvent, context: Context) = throw DataValidationException(event)
         }
         test(testObj, createEvent, 400)
+    }
+
+    @Test
+    fun createInvalidData() {
+        val event = createEvent.withBody("{\"foo\": \"bar\"}")
+        val testObj = object: ResourceHandler<Pet>("id") {
+            override fun create(event: APIGatewayProxyRequestEvent, context: Context) = event.parseBody<Pet>()
+        }
+        test(testObj, event, 400)
     }
 
     @Test
@@ -224,7 +235,7 @@ class ResourceHandlerUnitTest {
         test(testObj, event, 1337)
     }
 
-    private fun test(testObj: ResourceHandler<String>, event: APIGatewayProxyRequestEvent, statusCode: Int = 200, body: String? = ""): APIGatewayProxyResponseEvent {
+    private fun test(testObj: ResourceHandler<Any>, event: APIGatewayProxyRequestEvent, statusCode: Int = 200, body: String? = ""): APIGatewayProxyResponseEvent {
         val response = testObj.handleRequest(event, context)
         Assert.assertThat(response.statusCode, CoreMatchers.equalTo(statusCode))
 //        Assert.assertThat(response.body, CoreMatchers.equalTo(body))

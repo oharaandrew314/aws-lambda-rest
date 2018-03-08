@@ -13,7 +13,7 @@ val awsLambdaRest = project {
     name = "aws-lambda-rest"
     group = "io.andrewohara"
     artifactId = name
-    version = "0.1.0"
+    version = "0.3.0"
     directory = name
 
     dependencies {
@@ -41,10 +41,8 @@ val awsLambdaRest = project {
 
 val petsExample = project {
     name = "example-pets"
-    group = "io.andrewohara"
-    artifactId = name
-    version = "0.0.1"
     directory = name
+    version  = "0.0.1"
 
     dependsOn(awsLambdaRest)
 

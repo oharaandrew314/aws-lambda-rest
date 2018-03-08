@@ -17,7 +17,7 @@ open class ResourceHandler<out T: Any>(
         private val resourcePathParameter: String, enableCors: Boolean = true
 ): RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
 
-    private val mapper = Klaxon()
+    protected val mapper = Klaxon()
     private val headers = if(enableCors) {
         mapOf(
                 "Content-Type" to "application/json",
@@ -40,7 +40,7 @@ open class ResourceHandler<out T: Any>(
 
         return try {
             val result: Any = when {
-                restMethod.isOptions() -> options(event, context)
+                restMethod.isOptions() -> return options(event, context)
                 restMethod.isGet() && resourceId != null -> get(resourceId, event, context) ?: throw ResourceNotFoundException(resourceId)
                 restMethod.isGet() && resourceId == null -> list(event, context)
                 restMethod.isPost() && resourceId == null -> create(event, context)
@@ -58,6 +58,7 @@ open class ResourceHandler<out T: Any>(
         } catch (e: RestException) {
             e.asResponse(headers)
         } catch (e: Exception) {
+            e.printStackTrace()
             InternalServerError(cause=e).asResponse(headers)
         }
     }
@@ -136,4 +137,14 @@ open class ResourceHandler<out T: Any>(
      */
     @Throws(RestException::class)
     protected open fun default(event: APIGatewayProxyRequestEvent, context: Context): APIGatewayProxyResponseEvent = throw UnsupportedResourceOperation(event)
+
+    protected inline fun <reified T> APIGatewayProxyRequestEvent.maybeParseBody(): T? {
+        try {
+            return mapper.parse(this.body)
+        } catch (e: Exception) {
+            throw DataValidationException(this)
+        }
+    }
+
+    protected inline fun <reified T> APIGatewayProxyRequestEvent.parseBody(): T = maybeParseBody() ?: throw DataValidationException(this)
 }
