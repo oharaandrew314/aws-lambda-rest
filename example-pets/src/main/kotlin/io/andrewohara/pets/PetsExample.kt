@@ -6,7 +6,7 @@ import io.andrewohara.lambda.rest.ResourceHandler
 import io.andrewohara.lambda.rest.RestException
 import java.util.*
 
-data class Pet(val id: String, val name: String, val type: PetType)
+data class Pet(val id: String=UUID.randomUUID().toString(), val name: String, val type: PetType)
 data class CreateUpdatePetData(val name: String, val type: PetType)
 enum class PetType { Cat, Dog }
 
@@ -17,7 +17,7 @@ enum class PetType { Cat, Dog }
  * This must be the name of the API Gateway event pathParameter that
  * holds the id of the resource you are working with.
  */
-class PetsResource : ResourceHandler<Pet>("petId") {
+class PetsResource : ResourceHandler<Pet>(resourcePathParameter="petId", enableCors=true) {
 
     private val pets = mutableMapOf<String, Pet>()
 
@@ -43,7 +43,7 @@ class PetsResource : ResourceHandler<Pet>("petId") {
     @Throws(RestException::class)
     override fun create(event: APIGatewayProxyRequestEvent, context: Context): Pet {
         return event.parseBody<CreateUpdatePetData>()
-                .let { Pet(UUID.randomUUID().toString(), it.name, it.type) }
+                .let { Pet(name=it.name, type=it.type) }
                 .apply { pets[id] = this }
     }
 

@@ -44,70 +44,90 @@ package io.andrewohara.pets
 
 import com.amazonaws.services.lambda.runtime.Context
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent
-import com.beust.klaxon.Klaxon
-import io.andrewohara.lambda.rest.DataValidationException
 import io.andrewohara.lambda.rest.ResourceHandler
+import io.andrewohara.lambda.rest.RestException
 import java.util.*
+
+data class Pet(val id: String=UUID.randomUUID().toString(), val name: String, val type: PetType)
+data class CreateUpdatePetData(val name: String, val type: PetType)
+enum class PetType { Cat, Dog }
 
 /**
  * CRUD resource for pets
- * 
+ *
  * The ResourceHandler base class accepts a "resourcePath" parameter.
  * This must be the name of the API Gateway event pathParameter that
  * holds the id of the resource you are working with.
  */
-class PetsHandler : ResourceHandler<PetsHandler.Pet>("petId") {
+class PetsResource : ResourceHandler<Pet>(resourcePathParameter="petId", enableCors=true) {
 
-    data class Pet(val id: String, val name: String, val type: PetType)
-    data class CreateUpdatePetRequest(val name: String, val type: PetType)
-    enum class PetType { Cat, Dog }
-
-    private val mapper = Klaxon()
     private val pets = mutableMapOf<String, Pet>()
-
-    private fun getRequest(event: APIGatewayProxyRequestEvent): CreateUpdatePetRequest {
-        return try {
-            event.body?.let { mapper.parse<CreateUpdatePetRequest>(it) } ?: throw DataValidationException(event)
-        } catch (e: IllegalArgumentException) {
-            e.printStackTrace()
-            throw DataValidationException(event)
-        }
-    }
 
     /**
      * List all the pets (200)
      */
-    override fun list(event: APIGatewayProxyRequestEvent, context: Context) = pets.values.toList()
+    @Throws(RestException::class)
+    override fun list(event: APIGatewayProxyRequestEvent, context: Context): List<Pet> {
+        return pets.values.toList()
+    }
 
     /**
      * Get the pet by its id, or null (404)
      */
-    override fun get(resourceId: String, event: APIGatewayProxyRequestEvent, context: Context) = pets[resourceId]
+    @Throws(RestException::class)
+    override fun get(resourceId: String, event: APIGatewayProxyRequestEvent, context: Context): Pet? {
+        return pets[resourceId]
+    }
 
     /**
      * Create a pet if the request is valid (200), otherwise throw DataValidationException (400)
      */
+    @Throws(RestException::class)
     override fun create(event: APIGatewayProxyRequestEvent, context: Context): Pet {
-        return getRequest(event)
-                .let { Pet(UUID.randomUUID().toString(), it.name, it.type) }
+        return event.parseBody<CreateUpdatePetData>()
+                .let { Pet(name=it.name, type=it.type) }
                 .apply { pets[id] = this }
+    }
+
+    /**
+     * Create a pet with the given id id the request is valid (200)
+     * Otherwise, throw DataValidationException (400)
+     */
+    @Throws(RestException::class)
+    override fun createWithId(resourceId: String, event: APIGatewayProxyRequestEvent, context: Context): Pet {
+        return super.createWithId(resourceId, event, context)
     }
 
     /**
      * delete a pet if it exists (200), otherwise return null (404)
      */
-    override fun delete(resourceId: String, event: APIGatewayProxyRequestEvent, context: Context) = pets.remove(resourceId)
+    @Throws(RestException::class)
+    override fun delete(resourceId: String, event: APIGatewayProxyRequestEvent, context: Context): Pet? {
+        return pets.remove(resourceId)
+    }
 
     /**
      * update a pet if it exists (200)
      * If request is invalid, throws DataValidationException (400)
      * if pet does not exist, returns null (404)
      */
+    @Throws(RestException::class)
     override fun update(resourceId: String, event: APIGatewayProxyRequestEvent, context: Context): Pet? {
         if (resourceId !in pets) return null
-        return getRequest(event)
+        return event.parseBody<CreateUpdatePetData>()
                 .let { Pet(resourceId, it.name, it.type) }
                 .apply { pets[resourceId] = this }
+    }
+
+    /**
+     * Delete and return all the pets (200)
+     */
+    @Throws(RestException::class)
+    override fun deleteAll(event: APIGatewayProxyRequestEvent, context: Context): List<Pet> {
+        return pets
+                .keys
+                .mapNotNull { pets.remove(it) }
+                .toList()
     }
 }
 ```
@@ -123,17 +143,32 @@ Resources:
   PetsResource:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: io.andrewohara.pets.PetsHandler
+      Handler: io.andrewohara.pets.PetsResource
       Runtime: java8
       CodeUri: ./kobaltBuild/libs/example-pets-0.0.1.jar
       Timeout: 30
       MemorySize: 1024
       Events:
+        PetsOptions:
+          Type: Api
+          Properties:
+            Path: /pets
+            Method: options
         ListPets:
           Type: Api
           Properties:
-            Path: /pets/
+            Path: /pets
             Method: get
+        CreatePet:
+          Type: Api
+          Properties:
+            Path: /pets
+            Method: post
+        PetOptions:
+          Type: Api
+          Properties:
+            Path: /pets/{petId}
+            Method: options
         GetPet:
           Type: Api
           Properties:
@@ -144,11 +179,6 @@ Resources:
           Properties:
             Path: /pets/{petId}
             Method: put
-        CreatePet:
-          Type: Api
-          Properties:
-            Path: /pets/
-            Method: post
         DeletePet:
           Type: Api
           Properties:
