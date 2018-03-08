@@ -1,5 +1,7 @@
 # aws-lambda-rest (JVM)
 
+[ ![Download](https://api.bintray.com/packages/oharaandrew314/maven/aws-lambda-rest/images/download.svg) ](https://bintray.com/oharaandrew314/maven/aws-lambda-rest/_latestVersion)
+
 A JVM micro-framework for creating REST API resources on AWS Lambda, written in Kotlin.
 
 ## Features
@@ -22,8 +24,6 @@ A JVM micro-framework for creating REST API resources on AWS Lambda, written in 
 
 ## Installation
 
-My repo and jcenter are required
-
 ```groovy
 repositories {
     jcenter()
@@ -33,7 +33,7 @@ repositories {
 }
 
 dependencies {
-    compile 'io.andrewohara:aws-lambda-rest:0.1.0'
+    compile 'io.andrewohara:aws-lambda-rest:<latest_version>'
 }
 ```
 

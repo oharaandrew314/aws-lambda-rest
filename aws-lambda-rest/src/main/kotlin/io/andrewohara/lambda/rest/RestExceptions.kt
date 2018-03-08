@@ -15,14 +15,14 @@ class ResourceNotFoundException(resourceId: String): RestException(
         "Resource not found: $resourceId"
 )
 
-class DataValidationException(event: APIGatewayProxyRequestEvent): RestException(
+class DataValidationException(event: APIGatewayProxyRequestEvent, message: String? = null): RestException(
         400,
-        event.body
+        message ?: event.body
 )
 
-class UnsupportedResourceOperation(event: APIGatewayProxyRequestEvent): RestException(
+class UnsupportedResourceOperation(event: APIGatewayProxyRequestEvent, message: String? = null): RestException(
         405,
-        "Cannot perform ${event.httpMethod} ${event.resource}"
+        message ?: "Cannot perform ${event.httpMethod} ${event.resource}"
 )
 
 class InternalServerError(message: String? = null, cause: Exception? = null): RestException(500, message, cause)

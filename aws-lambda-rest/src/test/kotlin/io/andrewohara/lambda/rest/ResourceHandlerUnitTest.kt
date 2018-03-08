@@ -27,6 +27,8 @@ class ResourceHandlerUnitTest {
         }
     }
 
+    private val optionsEvent = APIGatewayProxyRequestEvent()
+            .withHttpMethod("OPTIONS")
     private val listEvent = APIGatewayProxyRequestEvent()
             .withHttpMethod("GET")
     private val getEvent = APIGatewayProxyRequestEvent()
@@ -48,6 +50,20 @@ class ResourceHandlerUnitTest {
         val event = APIGatewayProxyRequestEvent().withHttpMethod("FOO")
         val testObj = ResourceHandler<String>("id")
         test(testObj, event, 405)
+    }
+
+    @Test
+    fun optionsWithCors() {
+        val testObj = ResourceHandler<String>("id")
+        val response = test(testObj, optionsEvent, 200)
+        Assert.assertThat(response.headers["Access-Control-Allow-Origin"], CoreMatchers.equalTo("*"))
+    }
+
+    @Test
+    fun optionsWithoutCors() {
+        val testObj = ResourceHandler<String>("id", false)
+        val response = test(testObj, optionsEvent, 200)
+        Assert.assertThat(response.headers["Access-Control-Allow-Origin"], CoreMatchers.nullValue())
     }
 
     @Test
@@ -194,6 +210,18 @@ class ResourceHandlerUnitTest {
             override fun create(event: APIGatewayProxyRequestEvent, context: Context) = throw DataValidationException(event)
         }
         test(testObj, event, 405)
+    }
+
+    @Test
+    fun overrideDefault() {
+        val event = APIGatewayProxyRequestEvent().withHttpMethod("PUT")
+        val testObj = object: ResourceHandler<String>("id") {
+            override fun default(event: APIGatewayProxyRequestEvent, context: Context): APIGatewayProxyResponseEvent {
+                return APIGatewayProxyResponseEvent().withStatusCode(1337)
+            }
+        }
+
+        test(testObj, event, 1337)
     }
 
     private fun test(testObj: ResourceHandler<String>, event: APIGatewayProxyRequestEvent, statusCode: Int = 200, body: String? = ""): APIGatewayProxyResponseEvent {

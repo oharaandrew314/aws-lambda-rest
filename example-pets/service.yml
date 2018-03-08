@@ -6,7 +6,7 @@ Resources:
   PetsResource:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: io.andrewohara.pets.PetsHandler
+      Handler: io.andrewohara.pets.PetsResource
       Runtime: java8
       CodeUri: ./kobaltBuild/libs/example-pets-0.0.1.jar
       Timeout: 30
