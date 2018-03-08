@@ -7,11 +7,13 @@ A JVM micro-framework for creating REST API resources on AWS Lambda, written in 
 ## Features
 
 - standard CRUD operations for a single resource
-  - create -`POST /pets/`
+  - create - `POST /pets/`
+  - createWithId - `POST /pets/{petId}`
   - get - `GET /pets/{petId}`
   - list - `GET /pets/`
   - update - `PUT /pets/{petId}`
   - delete - `DELETE /pets/{petId}`
+  - deleteAll - `DELETE /pets/`
 - CORS
 
 ## Planned Features
