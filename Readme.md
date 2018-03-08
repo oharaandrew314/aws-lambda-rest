@@ -37,9 +37,7 @@ dependencies {
 }
 ```
 
-## Usage
-
-This is a minimal example.  The only operations implemented are `options` (by default) and `get`.  Any other operation will return a `405`.  Cors is enabled by default.
+## Minimal Example
 
 ```kotlin
 // MinimalExample.kt
@@ -51,6 +49,12 @@ import io.andrewohara.lambda.rest.ResourceHandler
 
 data class Person(val id: String)
 
+/**
+ * Minimal implementation of a ResourceHandler.
+ * The only available operations are options and get.
+ * 
+ * CORS is enabled by default.
+ */
 class MinimalResource: ResourceHandler<Person>("id") {
 
     override fun get(resourceId: String, event: APIGatewayProxyRequestEvent, context: Context): Person? {
@@ -82,7 +86,7 @@ Resources:
               Method: get
 ```
 
-This is a full CRUD example.
+## Full CRUD example
 
 ```kotlin
 // PetsExample.kt

@@ -6,6 +6,12 @@ import io.andrewohara.lambda.rest.ResourceHandler
 
 data class Person(val id: String)
 
+/**
+ * Minimal implementation of a ResourceHandler.
+ * The only available operations are options and get.
+ *
+ * CORS is enabled by default.
+ */
 class MinimalResource: ResourceHandler<Person>("id") {
 
     override fun get(resourceId: String, event: APIGatewayProxyRequestEvent, context: Context): Person? {
