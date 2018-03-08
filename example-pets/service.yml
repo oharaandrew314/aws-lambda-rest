@@ -12,11 +12,26 @@ Resources:
       Timeout: 30
       MemorySize: 1024
       Events:
+        PetsOptions:
+          Type: Api
+          Properties:
+            Path: /pets
+            Method: options
         ListPets:
           Type: Api
           Properties:
-            Path: /pets/
+            Path: /pets
             Method: get
+        CreatePet:
+          Type: Api
+          Properties:
+            Path: /pets
+            Method: post
+        PetOptions:
+          Type: Api
+          Properties:
+            Path: /pets/{petId}
+            Method: options
         GetPet:
           Type: Api
           Properties:
@@ -27,11 +42,6 @@ Resources:
           Properties:
             Path: /pets/{petId}
             Method: put
-        CreatePet:
-          Type: Api
-          Properties:
-            Path: /pets/
-            Method: post
         DeletePet:
           Type: Api
           Properties:
