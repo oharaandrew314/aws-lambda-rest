@@ -14,7 +14,8 @@ import com.beust.klaxon.Klaxon
  * Your lambda handler should point to the extension of this class.
  */
 open class ResourceHandler<out T: Any>(
-        private val resourcePathParameter: String, enableCors: Boolean = true
+        private val resourcePathParameter: String,
+        enableCors: Boolean = true
 ): RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
 
     protected val mapper = Klaxon()
@@ -56,6 +57,7 @@ open class ResourceHandler<out T: Any>(
                     .withStatusCode(200)
                     .withBody(mapper.toJsonString(result))
         } catch (e: RestException) {
+            e.printStackTrace()
             e.asResponse(headers)
         } catch (e: Exception) {
             e.printStackTrace()

@@ -4,6 +4,7 @@ import com.amazonaws.services.lambda.runtime.Context
 import com.amazonaws.services.lambda.runtime.LambdaLogger
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent
+import com.beust.klaxon.Klaxon
 import org.hamcrest.CoreMatchers
 import org.junit.Assert
 import org.junit.Test
@@ -240,5 +241,17 @@ class ResourceHandlerUnitTest {
         Assert.assertThat(response.statusCode, CoreMatchers.equalTo(statusCode))
 //        Assert.assertThat(response.body, CoreMatchers.equalTo(body))
         return response
+    }
+
+    @Test
+    fun foo() {
+        val mapper = Klaxon()
+        val data = mapOf("foo" to "bar")
+        val json = mapper.toJsonString(data)
+        println(json)
+//        println(mapper.parse<Map<String, String>>(json))
+
+        val parsed: Map<String, String> = mapper.parseJsonObject(json.reader()).mapValues { it.value.toString() }
+        println(parsed)
     }
 }

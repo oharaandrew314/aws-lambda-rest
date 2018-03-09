@@ -2,26 +2,19 @@ import com.beust.kobalt.*
 import com.beust.kobalt.plugin.packaging.assemble
 import com.beust.kobalt.plugin.publish.bintray
 
-object Version {
-    const val kotlin = "1.2.21"
-    const val lambdaCore = "1.2.0"
-    const val lambdaEvents = "2.0.1"
-    const val klaxon = "2.1.6"
-}
-
 val awsLambdaRest = project {
     name = "aws-lambda-rest"
     group = "io.andrewohara"
     artifactId = name
-    version = "0.3.0"
+    version = "0.3.1"
     directory = name
 
     dependencies {
         compile(
-                "org.jetbrains.kotlin:kotlin-stdlib:${Version.kotlin}",
-                "com.amazonaws:aws-lambda-java-core:${Version.lambdaCore}",
-                "com.amazonaws:aws-lambda-java-events:${Version.lambdaEvents}",
-                "com.beust:klaxon:${Version.klaxon}"
+                "org.jetbrains.kotlin:kotlin-stdlib:[1.2.0,)",
+                "com.amazonaws:aws-lambda-java-core:[1.2.0,)",
+                "com.amazonaws:aws-lambda-java-events:[2.0.1,)",
+                "com.beust:klaxon:[2.1.2,)"
         )
     }
 
@@ -45,15 +38,6 @@ val petsExample = project {
     version  = "0.0.1"
 
     dependsOn(awsLambdaRest)
-
-    dependencies {
-        compile(
-                "org.jetbrains.kotlin:kotlin-stdlib:${Version.kotlin}",
-                "com.amazonaws:aws-lambda-java-core:${Version.lambdaCore}",
-                "com.amazonaws:aws-lambda-java-events:${Version.lambdaEvents}",
-                "com.beust:klaxon:${Version.klaxon}"
-        )
-    }
 
     assemble {
         jar {
