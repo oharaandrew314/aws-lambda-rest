@@ -6,9 +6,11 @@ import io.andrewohara.lambda.rest.ResourceHandler
 import io.andrewohara.lambda.rest.RestException
 import java.util.*
 
-data class Pet(val id: String=UUID.randomUUID().toString(), val name: String, val type: PetType)
-data class CreateUpdatePetData(val name: String, val type: PetType)
-enum class PetType { Cat, Dog }
+data class Pet(val id: String=UUID.randomUUID().toString(), val name: String, val type: Type) {
+    enum class Type { Cat, Dog }
+}
+data class CreateUpdatePetData(val name: String, val type: Pet.Type)
+
 
 /**
  * CRUD resource for pets
@@ -43,7 +45,7 @@ class PetsResource : ResourceHandler<Pet>(resourcePathParameter="petId", enableC
     @Throws(RestException::class)
     override fun create(event: APIGatewayProxyRequestEvent, context: Context): Pet {
         return event.parseBody<CreateUpdatePetData>()
-                .let { Pet(name=it.name, type=it.type) }
+                .let { Pet(name = it.name, type = it.type) }
                 .apply { pets[id] = this }
     }
 

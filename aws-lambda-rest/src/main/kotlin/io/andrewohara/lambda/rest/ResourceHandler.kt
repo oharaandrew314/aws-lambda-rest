@@ -32,25 +32,22 @@ open class ResourceHandler<out T: Any>(
     override fun handleRequest(event: APIGatewayProxyRequestEvent, context: Context): APIGatewayProxyResponseEvent {
         context.logger.log(event.toString())
 
+        event.body = event.body ?: ""
+
         val resourceId = event.pathParameters?.get(resourcePathParameter)
-        val restMethod = try {
-            RestMethod.valueOf(event.httpMethod)
-        } catch (e: IllegalArgumentException) {
-            return UnsupportedResourceOperation(event).asResponse(headers)
-        }
 
         return try {
-            val result: Any = when {
-                restMethod.isOptions() -> return options(event, context)
-                restMethod.isGet() && resourceId != null -> get(resourceId, event, context) ?: throw ResourceNotFoundException(resourceId)
-                restMethod.isGet() && resourceId == null -> list(event, context)
-                restMethod.isPost() && resourceId == null -> create(event, context)
-                restMethod.isPost() && resourceId != null -> createWithId(resourceId, event, context)
-                restMethod.isPut() && resourceId != null -> update(resourceId, event, context) ?: throw ResourceNotFoundException(resourceId)
-                restMethod.isDelete() && resourceId != null -> delete(resourceId, event, context) ?: throw ResourceNotFoundException(resourceId)
-                restMethod.isDelete() && resourceId == null -> deleteAll(event, context)
-                else -> return default(event, context)
-            }
+            val result: Any = when(event.operation()) {
+                RestOperation.Options -> return options(event, context)
+                RestOperation.List -> list(event, context)
+                RestOperation.Get -> get(resourceId!!, event, context)
+                RestOperation.Create -> create(event, context)
+                RestOperation.CreateWithId -> createWithId(resourceId!!, event, context)
+                RestOperation.Update -> update(resourceId!!, event, context)
+                RestOperation.Delete -> delete(resourceId!!, event, context)
+                RestOperation.DeleteAll -> deleteAll(event, context)
+                null -> return default(event, context)
+            } ?: throw ResourceNotFoundException(resourceId ?: "")
 
             APIGatewayProxyResponseEvent()
                     .withHeaders(headers)
@@ -140,13 +137,32 @@ open class ResourceHandler<out T: Any>(
     @Throws(RestException::class)
     protected open fun default(event: APIGatewayProxyRequestEvent, context: Context): APIGatewayProxyResponseEvent = throw UnsupportedResourceOperation(event)
 
-    protected inline fun <reified T> APIGatewayProxyRequestEvent.maybeParseBody(): T? {
+    inline fun <reified T> APIGatewayProxyRequestEvent.maybeParseBody(): T? {
         try {
             return mapper.parse(this.body)
         } catch (e: Exception) {
+            e.printStackTrace()
             throw DataValidationException(this)
         }
     }
 
-    protected inline fun <reified T> APIGatewayProxyRequestEvent.parseBody(): T = maybeParseBody() ?: throw DataValidationException(this)
+    inline fun <reified T> APIGatewayProxyRequestEvent.parseBody(): T = maybeParseBody() ?: throw DataValidationException(this)
+
+    fun APIGatewayProxyRequestEvent.parseBodyRaw(): Map<String, Any> = mapper.parseJsonObject(body.reader())
+            .toMap()
+            .filterValues { it != null }
+            .mapValues { it.value as Any }
+
+    fun APIGatewayProxyRequestEvent.operation(): RestOperation? {
+        val hasResource = pathParameters?.containsKey(resourcePathParameter) ?: false
+
+        return when(httpMethod.toLowerCase()) {
+            "options" -> RestOperation.Options
+            "get" -> if (hasResource) RestOperation.Get else RestOperation.List
+            "post" -> if (hasResource) RestOperation.CreateWithId else RestOperation.Create
+            "put" -> if (hasResource) RestOperation.Update else null
+            "delete" -> if (hasResource) RestOperation.Delete else RestOperation.DeleteAll
+            else -> null
+        }
+    }
 }

@@ -13,20 +13,22 @@ class ResourceHandlerUnitTest {
 
     data class Pet(val name: String)
 
-    private val context = object: Context {
-        override fun getAwsRequestId() = throw UnsupportedOperationException()
-        override fun getLogGroupName() = throw UnsupportedOperationException()
-        override fun getLogStreamName() = throw UnsupportedOperationException()
-        override fun getClientContext() = throw UnsupportedOperationException()
-        override fun getFunctionName() = throw UnsupportedOperationException()
-        override fun getFunctionVersion() = throw UnsupportedOperationException()
-        override fun getIdentity() = throw UnsupportedOperationException()
-        override fun getInvokedFunctionArn() = throw UnsupportedOperationException()
-        override fun getMemoryLimitInMB() = throw UnsupportedOperationException()
-        override fun getRemainingTimeInMillis() = throw UnsupportedOperationException()
-        override fun getLogger() = object: LambdaLogger {
-            override fun log(message: String?) { }
-            override fun log(message: ByteArray?) { }
+    companion object {
+        val context = object: Context {
+            override fun getAwsRequestId() = throw UnsupportedOperationException()
+            override fun getLogGroupName() = throw UnsupportedOperationException()
+            override fun getLogStreamName() = throw UnsupportedOperationException()
+            override fun getClientContext() = throw UnsupportedOperationException()
+            override fun getFunctionName() = throw UnsupportedOperationException()
+            override fun getFunctionVersion() = throw UnsupportedOperationException()
+            override fun getIdentity() = throw UnsupportedOperationException()
+            override fun getInvokedFunctionArn() = throw UnsupportedOperationException()
+            override fun getMemoryLimitInMB() = throw UnsupportedOperationException()
+            override fun getRemainingTimeInMillis() = throw UnsupportedOperationException()
+            override fun getLogger() = object: LambdaLogger {
+                override fun log(message: String?) { }
+                override fun log(message: ByteArray?) { }
+            }
         }
     }
 
@@ -236,22 +238,9 @@ class ResourceHandlerUnitTest {
         test(testObj, event, 1337)
     }
 
-    private fun test(testObj: ResourceHandler<Any>, event: APIGatewayProxyRequestEvent, statusCode: Int = 200, body: String? = ""): APIGatewayProxyResponseEvent {
+    private fun test(testObj: ResourceHandler<Any>, event: APIGatewayProxyRequestEvent, statusCode: Int = 200): APIGatewayProxyResponseEvent {
         val response = testObj.handleRequest(event, context)
         Assert.assertThat(response.statusCode, CoreMatchers.equalTo(statusCode))
-//        Assert.assertThat(response.body, CoreMatchers.equalTo(body))
         return response
-    }
-
-    @Test
-    fun foo() {
-        val mapper = Klaxon()
-        val data = mapOf("foo" to "bar")
-        val json = mapper.toJsonString(data)
-        println(json)
-//        println(mapper.parse<Map<String, String>>(json))
-
-        val parsed: Map<String, String> = mapper.parseJsonObject(json.reader()).mapValues { it.value.toString() }
-        println(parsed)
     }
 }

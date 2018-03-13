@@ -11,10 +11,10 @@ val awsLambdaRest = project {
 
     dependencies {
         compile(
-                "org.jetbrains.kotlin:kotlin-stdlib:[1.2.0,)",
-                "com.amazonaws:aws-lambda-java-core:[1.2.0,)",
-                "com.amazonaws:aws-lambda-java-events:[2.0.1,)",
-                "com.beust:klaxon:[2.1.2,)"
+                "org.jetbrains.kotlin:kotlin-stdlib:1.2.0",
+                "com.amazonaws:aws-lambda-java-core:1.2.0",
+                "com.amazonaws:aws-lambda-java-events:2.0.1",
+                "com.beust:klaxon:2.1.11"
         )
     }
 
@@ -28,7 +28,6 @@ val awsLambdaRest = project {
 
     bintray {
         publish = true
-
     }
 }
 
@@ -38,6 +37,19 @@ val petsExample = project {
     version  = "0.0.1"
 
     dependsOn(awsLambdaRest)
+
+    dependencies {
+        compile(
+                "org.jetbrains.kotlin:kotlin-stdlib:1.2.0",
+                "com.amazonaws:aws-lambda-java-core:1.2.0",
+                "com.amazonaws:aws-lambda-java-events:2.0.1",
+                "com.beust:klaxon:2.1.11"
+        )
+    }
+
+    dependenciesTest {
+        compile("junit:junit:4.12")
+    }
 
     assemble {
         jar {
