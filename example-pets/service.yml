@@ -27,38 +27,20 @@ Resources:
       Timeout: 30
       MemorySize: 1024
       Events:
-        PetsOptions:
+        Pets:
           Type: Api
           Properties:
             Path: /pets
-            Method: options
-        ListPets:
-          Type: Api
-          Properties:
-            Path: /pets
-            Method: get
-        CreatePet:
-          Type: Api
-          Properties:
-            Path: /pets
-            Method: post
-        PetOptions:
+            Method: any
+        Pet:
           Type: Api
           Properties:
             Path: /pets/{petId}
-            Method: options
-        GetPet:
-          Type: Api
-          Properties:
-            Path: /pets/{petId}
-            Method: get
-        UpdatePet:
-          Type: Api
-          Properties:
-            Path: /pets/{petId}
-            Method: put
-        DeletePet:
-          Type: Api
-          Properties:
-            Path: /pets/{petId}
-            Method: delete
+            Method: any
+
+  PetsResourcePermission:  # This is required because of a bug in AWS SAM when using the "Any" Method on api events
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !Ref PetsResource
+      Principal: apigateway.amazonaws.com

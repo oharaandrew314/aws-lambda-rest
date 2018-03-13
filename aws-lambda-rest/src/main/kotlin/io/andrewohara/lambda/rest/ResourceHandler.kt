@@ -18,7 +18,7 @@ open class ResourceHandler<out T: Any>(
         enableCors: Boolean = true
 ): RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
 
-    protected val mapper = Klaxon()
+    val mapper = Klaxon()
     private val headers = if(enableCors) {
         mapOf(
                 "Content-Type" to "application/json",
@@ -31,7 +31,6 @@ open class ResourceHandler<out T: Any>(
 
     override fun handleRequest(event: APIGatewayProxyRequestEvent, context: Context): APIGatewayProxyResponseEvent {
         context.logger.log(event.toString())
-
         event.body = event.body ?: ""
 
         val resourceId = event.pathParameters?.get(resourcePathParameter)
@@ -137,6 +136,10 @@ open class ResourceHandler<out T: Any>(
     @Throws(RestException::class)
     protected open fun default(event: APIGatewayProxyRequestEvent, context: Context): APIGatewayProxyResponseEvent = throw UnsupportedResourceOperation(event)
 
+    /**
+     * APIGatewayProxyRequestEvent helper methods
+     */
+
     inline fun <reified T> APIGatewayProxyRequestEvent.maybeParseBody(): T? {
         try {
             return mapper.parse(this.body)
@@ -153,8 +156,8 @@ open class ResourceHandler<out T: Any>(
             .filterValues { it != null }
             .mapValues { it.value as Any }
 
-    fun APIGatewayProxyRequestEvent.operation(): RestOperation? {
-        val hasResource = pathParameters?.containsKey(resourcePathParameter) ?: false
+    private fun APIGatewayProxyRequestEvent.operation(): RestOperation? {
+        val hasResource = pathParam(resourcePathParameter) != null
 
         return when(httpMethod.toLowerCase()) {
             "options" -> RestOperation.Options
@@ -165,4 +168,7 @@ open class ResourceHandler<out T: Any>(
             else -> null
         }
     }
+
+    private fun APIGatewayProxyRequestEvent.pathParam(name: String) = pathParameters?.get(name)
+    private fun APIGatewayProxyRequestEvent.queryParam(name: String) = queryStringParameters?.get(name)
 }
