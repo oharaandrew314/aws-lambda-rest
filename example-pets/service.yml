@@ -3,10 +3,10 @@ Transform: AWS::Serverless-2016-10-31
 Description: aws-lambda-rest example for pets endpoints
 
 Resources:
-  MinimalResource:
+  MinimalExample:
       Type: AWS::Serverless::Function
       Properties:
-        Handler: io.andrewohara.minimal.MinimalResource
+        Handler: io.andrewohara.lambda.rest.MinimalExample
         Runtime: java8
         CodeUri: ./kobaltBuild/libs/example-pets-0.0.1.jar
         Timeout: 30
@@ -18,10 +18,10 @@ Resources:
               Path: /people/{id}
               Method: get
 
-  PetsResource:
+  PetsExample:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: io.andrewohara.pets.PetsResource
+      Handler: io.andrewohara.lambda.rest.PetsExample
       Runtime: java8
       CodeUri: ./kobaltBuild/libs/example-pets-0.0.1.jar
       Timeout: 30
@@ -42,5 +42,5 @@ Resources:
     Type: AWS::Lambda::Permission
     Properties:
       Action: lambda:InvokeFunction
-      FunctionName: !Ref PetsResource
+      FunctionName: !Ref PetsExample
       Principal: apigateway.amazonaws.com

@@ -37,6 +37,3 @@ class InternalServerError(message: String? = null, cause: Exception? = null): Re
         500,
         "Internal Server Error: $message",
         cause)
-
-class RestUnauthorizedException(): RestException(401, "Unauthorized")
-class RestForbiddenException(): RestException(403, "Forbidden")

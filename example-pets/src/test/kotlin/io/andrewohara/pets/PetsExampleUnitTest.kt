@@ -3,15 +3,16 @@ package io.andrewohara.pets
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent
 import com.beust.klaxon.JsonObject
 import com.beust.klaxon.Klaxon
-import io.andrewohara.lambda.rest.ResourceHandlerUnitTest
+import io.andrewohara.lambda.rest.PetsExample.Pet
+import io.andrewohara.lambda.rest.PetsExample
 import org.hamcrest.CoreMatchers
 import org.junit.Assert
 import org.junit.Test
 
-class PetsResourceUnitTest {
+class PetsExampleUnitTest {
 
-    private val testObj = PetsResource()
-    private val context = ResourceHandlerUnitTest.context
+    private val testObj = PetsExample()
+    private val context = Contexts.testContext
     private val mapper = Klaxon()
 
     private val listEvent = APIGatewayProxyRequestEvent()
@@ -47,11 +48,7 @@ class PetsResourceUnitTest {
     fun getNotFound() {
         val response = testObj.handleRequest(getEvent("123"), context)
         Assert.assertThat(response.statusCode, CoreMatchers.equalTo(404))
-
-        Assert.assertThat(
-                mapper.parseJsonObject(response.body.reader()).toMap(),
-                CoreMatchers.equalTo(mapOf<String, Any?>("message" to "Resource not found: 123"))
-        )
+        Assert.assertThat(response.body, CoreMatchers.containsString("Resource not found: 123"))
     }
 
     @Test

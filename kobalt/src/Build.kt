@@ -6,7 +6,7 @@ val awsLambdaRest = project {
     name = "aws-lambda-rest"
     group = "io.andrewohara"
     artifactId = name
-    version = "0.3.1"
+    version = "0.4.0"
     directory = name
 
     dependencies {
